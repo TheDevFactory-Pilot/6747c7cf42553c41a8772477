@@ -1,0 +1,41 @@
+#backend compose file
+version: '3.8'
+services:
+
+  mongocandidate:
+    image: 'mongo'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  #pull image from ECR and simply runs api calls imperatively 
+  candidateapp:
+  #IF Testing setup, uncomment this
+    build:
+      context: .
+    ports:
+      - 80:80
+    depends_on: 
+      - mongocandidate
+    environment:
+      - DB_EVAL_URL=mongocandidate
+      - PORT=80
+
+  evaluationworker:
+    image: 426691418260.dkr.ecr.us-east-1.amazonaws.com/deployment_testing
+    depends_on: 
+      #- candidateapp
+      - candidateapp
+    volumes:
+      - ./src:/app/src
+    environment: #changes
+      - projectID=6747c7cf42553c41a8772477
+      - templateId=66ed65497bc91b1c8be366ab
+      - skill=express
+      - hiringCampaignId=6747c0444f9b2ea96c2df017
+      - sub=6cf2c962-9f85-4b1d-a262-2c5f923aa02b
+      - trackID=6747c7cf42553c41a8772479
+  
+
+
+
